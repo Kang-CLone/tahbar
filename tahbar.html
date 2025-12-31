@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Year Countdown 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Orbitron', sans-serif;
+            background: #000814; /* Langit malam gelap pekat */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* ================= STARS BACKGROUND ================= */
+        .stars, .stars2, .stars3 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+
+        .stars .star {
+            width: 1px;
+            height: 1px;
+            animation-duration: 8s;
+        }
+
+        .stars2 .star {
+            width: 2px;
+            height: 2px;
+            animation-duration: 12s;
+        }
+
+        .stars3 .star {
+            width: 3px;
+            height: 3px;
+            animation-duration: 15s;
+            box-shadow: 0 0 8px #fff;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* ================= COUNTDOWN ================= */
+        #countdown {
+            font-size: 8rem;
+            font-weight: 700;
+            z-index: 10;
+            text-shadow: 
+                0 0 20px #00ffff,
+                0 0 40px #00ffff,
+                0 0 60px #9b5cff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; }
+            to { text-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ff; }
+        }
+
+        /* ================= CANVAS & OVERLAY ================= */
+        #fireworks-canvas,
+        #fade-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        #fireworks-canvas {
+            z-index: 12;
+        }
+
+        #fade-overlay {
+            background: #000;
+            opacity: 0;
+            z-index: 15;
+            transition: opacity 0.6s ease;
+        }
+
+        /* ================= TEXT ================= */
+        #new-year-text,
+        #by-text {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        #new-year-text {
+            font-size: 4.5rem;
+            top: 40%;
+        }
+
+        #by-text {
+            font-size: 1.8rem;
+            bottom: 15%;
+        }
+
+        .reveal {
+            animation:
+                revealMove 1.6s ease-out forwards,
+                floatText 4s ease-in-out infinite 1.6s;
+        }
+
+        @keyframes revealMove {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(40px) scale(0.85);
+                filter: blur(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+            50% { transform: translate(-50%, -50%) translateY(-12px); }
+        }
+
+        /* ================= GLITCH ================= */
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        .glitch::before {
+            color: #00ffff;
+            animation: glitchTop 0.4s linear;
+        }
+
+        .glitch::after {
+            color: #ff00ff;
+            animation: glitchBottom 0.4s linear;
+        }
+
+        @keyframes glitchTop {
+            0%   { clip-path: inset(0 0 80% 0); transform: translate(-3px, -3px); }
+            50%  { clip-path: inset(0 0 20% 0); transform: translate(3px, 3px); }
+            100% { clip-path: inset(0 0 80% 0); transform: translate(0, 0); }
+        }
+
+        @keyframes glitchBottom {
+            0%   { clip-path: inset(80% 0 0 0); transform: translate(3px, 3px); }
+            50%  { clip-path: inset(20% 0 0 0); transform: translate(-3px, -3px); }
+            100% { clip-path: inset(80% 0 0 0); transform: translate(0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lapisan bintang-bintang berkelap-kelip -->
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    <div class="stars3"></div>
+
+    <div id="countdown"></div>
+    <canvas id="fireworks-canvas"></canvas>
+    <div id="fade-overlay"></div>
+
+    <div id="new-year-text" class="glitch" data-text="SELAMAT TAHUN BARU 2026">
+        SELAMAT TAHUN BARU 2026
+    </div>
+
+    <!-- <div id="by-text" class="glitch" data-text="by : bung clone">
+        by : bung clone
+    </div> -->
+
+    <script>
+        // ================== CREATE STARS ==================
+        function createStars(container, count) {
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 15 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        createStars(document.querySelector('.stars'), 200);
+        createStars(document.querySelector('.stars2'), 100);
+        createStars(document.querySelector('.stars3'), 50);
+
+        // ================== COUNTDOWN & FIREWORKS ==================
+        const countdownEl = document.getElementById('countdown');
+        const canvas = document.getElementById('fireworks-canvas');
+        const overlay = document.getElementById('fade-overlay');
+        const title = document.getElementById('new-year-text');
+        const credit = document.getElementById('by-text');
+
+        const TEST_MODE = true;        // Ubah ke false untuk countdown real ke 1 Januari 2026
+        const TEST_SECONDS = 15;       // Waktu testing
+
+        let triggered = false;
+        let testTargetTime = null;
+
+        function getTargetTime() {
+            const now = new Date();
+            if (TEST_MODE) {
+                if (!testTargetTime) {
+                    testTargetTime = new Date(now.getTime() + TEST_SECONDS * 1000);
+                }
+                return testTargetTime;
+            }
+            return new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0); // 1 Januari 2026 00:00:00
+        }
+
+        const targetTime = getTargetTime();
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = targetTime - now;
+
+            if (diff <= 0 && !triggered) {
+                triggered = true;
+                startNewYear();
+                return;
+            }
+
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            countdownEl.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function startNewYear() {
+            countdownEl.style.display = 'none';
+            overlay.style.opacity = 1;
+
+            setTimeout(() => {
+                overlay.style.opacity = 0;
+                setTimeout(() => {
+                    initElegantFireworks();
+                    title.classList.add('reveal');
+                    setTimeout(() => credit.classList.add('reveal'), 600);
+                }, 800);
+            }, 800);
+        }
+
+        // ================== ELEGANT FIREWORKS ==================
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        let fountains = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor(x, y, vx, vy, hue, size = 3) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.hue = hue;
+                this.brightness = Math.random() * 20 + 80;
+                this.alpha = 1;
+                this.size = size;
+                this.gravity = 0.08;
+                this.friction = 0.97;
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.vx *= this.friction;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.006;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(this.alpha, 0);
+                ctx.fillStyle = `hsl(${this.hue}, 90%, ${this.brightness}%)`;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = `hsl(${this.hue}, 100%, 70%)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFountains() {
+            fountains = [
+                { x: canvas.width * 0.25, y: canvas.height },
+                { x: canvas.width * 0.5,  y: canvas.height },
+                { x: canvas.width * 0.75, y: canvas.height }
+            ];
+        }
+
+        function emitFromFountains() {
+            fountains.forEach(f => {
+                const hue = Math.random() * 60 + 180; // Biru-ungu-pink lembut
+
+                for (let i = 0; i < 6; i++) {
+                    const angle = Math.PI / 2 + (Math.random() * 0.6 - 0.3);
+                    const speed = Math.random() * 6 + 8;
+
+                    const vx = Math.sin(angle) * speed * (f.x < canvas.width / 2 ? -0.8 : (f.x > canvas.width / 2 ? 0.8 : 0));
+                    const vy = -Math.cos(angle) * speed;
+
+                    particlesArray.push(new Particle(f.x, f.y - 30, vx, vy, hue, Math.random() * 2 + 2));
+                }
+            });
+        }
+
+        function createSoftExplosion() {
+            const x = canvas.width * 0.3 + Math.random() * canvas.width * 0.4;
+            const y = canvas.height * 0.2 + Math.random() * canvas.height * 0.2;
+            const hue = Math.random() * 80 + 160;
+            const count = 100;
+
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.2;
+                const speed = Math.random() * 5 + 3;
+                particlesArray.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, hue, 3));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particlesArray = particlesArray.filter(p => {
+                p.update();
+                p.draw();
+                return p.alpha > 0;
+            });
+        }
+
+        function initElegantFireworks() {
+            createFountains();
+
+            const emitInterval = setInterval(emitFromFountains, 120);
+            const explosionInterval = setInterval(createSoftExplosion, 2500);
+
+            // Pertunjukan berlangsung ±25 detik
+            setTimeout(() => {
+                clearInterval(emitInterval);
+                clearInterval(explosionInterval);
+            }, 25000);
+
+            function loop() {
+                animate();
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // Jalankan countdown
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>
